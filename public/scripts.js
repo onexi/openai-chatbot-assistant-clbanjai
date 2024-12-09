@@ -1,37 +1,84 @@
-// Initiate the state object with the assistant_id and threadId as null and an empty array for messages
 let state = {
   assistant_id: null,
   assistant_name: null,
   threadId: null,
   messages: [],
 };
+
 async function getAssistant(){
   let name = document.getElementById('assistant_name').value;
-  console.log(`assistant_id: ${name}`)
-  const response = await fetch('/api/assistants', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name: name }),
-  });
-  state = await response.json();  // the state object is updated with the response from the server
-  writeToMessages(`Assistant ${state.assistant_name} is ready to chat`);
-  console.log(`back from fetch with state: ${JSON.stringify(state)}`)
+  try {
+    const response = await fetch('/api/assistants', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: name }),
+    });
+    state = await response.json();
+    displayMessage(`Assistant ${state.assistant_name} is ready to chat`, 'system');
+  } catch (error) {
+    displayMessage('Failed to retrieve assistant', 'error');
+    console.error(error);
+  }
 }
 
 async function getThread(){
-
-// Enter Code Here
-
+  try {
+    const response = await fetch('/api/threads', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    const threadData = await response.json();
+    state.threadId = threadData.threadId;
+    displayMessage(`New thread created: ${state.threadId}`, 'system');
+  } catch (error) {
+    displayMessage('Failed to create thread', 'error');
+    console.error(error);
+  }
 }
+
 async function getResponse(){
+  const userMessage = document.getElementById('messageInput').value;
+  
+  if (!state.threadId || !userMessage.trim()) {
+    displayMessage('Please select an assistant, create a thread, and enter a message', 'error');
+    return;
+  }
 
-// Enter Code Here
+  try {
+    displayMessage(userMessage, 'user');
 
+    const response = await fetch('/api/run', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: userMessage })
+    });
+    
+    const data = await response.json();
+    
+    data.messages.forEach(msg => {
+      if (msg.role === 'assistant') {
+        displayMessage(msg.content, 'assistant');
+      }
+    });
+
+    document.getElementById('messageInput').value = '';
+  } catch (error) {
+    displayMessage('Failed to get response from assistant', 'error');
+    console.error(error);
+  }
 }
-async function writeToMessages(message){
-  let messageDiv = document.getElementById("message-container");
-  messageDiv.innerHTML = message;
-  document.getElementById('messages').appendChild(messageDiv);
+
+function displayMessage(message, type) {
+  const messageContainer = document.getElementById('message-container');
+  const messageElement = document.createElement('div');
+  messageElement.classList.add('message', type);
+  messageElement.textContent = message;
+  messageContainer.appendChild(messageElement);
+  messageContainer.scrollTop = messageContainer.scrollHeight;
 }

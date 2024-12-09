@@ -2,74 +2,155 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Assistant Chat</title>
+    <title>AI Assistant Chat</title>
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <style>
+      :root {
+        --bg-dark: #121212;
+        --bg-darker: #0a0a0a;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --accent-blue: #3498db;
+        --accent-green: #2ecc71;
+      }
+
       body {
-        background-color: #121212;
-        color: #ffffff;
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
+
+      .chat-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        background-color: var(--bg-darker);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        overflow: hidden;
+      }
+
+      .chat-header {
+        background-color: rgba(52, 152, 219, 0.2);
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
       .message-container {
-        height: 200px;
-        overflow-y: scroll;
-        border: 1px solid #444;
-        padding: 10px;
-        margin-bottom: 15px;
+        height: 400px;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: var(--bg-dark);
       }
+
+      .message {
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        max-width: 80%;
+      }
+
       .message.user {
-        color: #0dcaf0;
+        background-color: rgba(52, 152, 219, 0.2);
+        color: var(--accent-blue);
+        align-self: flex-end;
+        margin-left: auto;
       }
+
       .message.assistant {
-        color: #ffc107;
+        background-color: rgba(46, 204, 113, 0.2);
+        color: var(--accent-green);
+        align-self: flex-start;
+      }
+
+      .message.system, .message.error {
+        background-color: rgba(128, 128, 128, 0.2);
+        color: var(--text-secondary);
+        font-style: italic;
+        text-align: center;
+      }
+
+      .input-group {
+        background-color: var(--bg-darker);
+        padding: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .form-control {
+        background-color: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--text-primary);
+      }
+
+      .form-control:focus {
+        background-color: rgba(255,255,255,0.1);
+        border-color: var(--accent-blue);
+        box-shadow: none;
+        color: var(--text-primary);
+      }
+
+      .btn-primary, .btn-secondary {
+        margin-right: 0.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover, .btn-secondary:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
       }
     </style>
   </head>
   <body>
-    <div class="container my-5">
-      <h1 class="text-center">Assistant Chat</h1>
-
-      <!-- Assistant Selection -->
-      <div class="mb-3">
-        <label for="assistantSelect" class="form-label">Select Assistant</label>
-        <input
-          id="assistant_name"
-          type="text"
-          value="asst_2JWXaEmwhgVBotP0QDjH9Dbm"
-        />
-        <button
-          id="get_assistant"
-          class="btn btn-primary"
-          onclick="getAssistant()"
-        >
-          Get Assistant
-        </button>
+    <div class="chat-container">
+      <div class="chat-header">
+        <h2 class="mb-0">AI Assistant Chat</h2>
       </div>
 
-      <!-- Create New Thread Button -->
-      <div class="mb-3">
-        <button id="newThreadBtn" class="btn btn-primary" onclick="getThread()">
-          Create New Thread
-        </button>
+      <div class="p-3">
+        <!-- Assistant Selection -->
+        <div class="mb-3 d-flex">
+          <input
+            id="assistant_name"
+            type="text"
+            class="form-control me-2"
+            value="asst_2JWXaEmwhgVBotP0QDjH9Dbm"
+            placeholder="Enter Assistant ID"
+          />
+          <button
+            id="get_assistant"
+            class="btn btn-primary"
+            onclick="getAssistant()"
+          >
+            Select
+          </button>
+        </div>
+
+        <!-- Create New Thread Button -->
+        <div class="mb-3">
+          <button id="newThreadBtn" class="btn btn-secondary" onclick="getThread()">
+            New Thread
+          </button>
+        </div>
       </div>
 
       <!-- Message Display -->
       <div class="message-container" id="message-container"></div>
 
       <!-- Message Input -->
-      <div class="input-group mb-3">
-        <button id="sendBtn" class="btn btn-success" onclick="getResponse()">
-          Send
-        </button>
+      <div class="input-group">
         <input
           type="text"
           id="messageInput"
           class="form-control"
           placeholder="Type your message..."
         />
+        <button id="sendBtn" class="btn btn-success" onclick="getResponse()">
+          Send
+        </button>
       </div>
     </div>
 
